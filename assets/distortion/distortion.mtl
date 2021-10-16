@@ -23,6 +23,8 @@
     }
   ],
   "_props": [
-    {}
+    {
+      "noiseIntensity": 0.7
+    }
   ]
 }

@@ -18,6 +18,7 @@ CCEffect %{
       properties:
         alphaThreshold: { value: 0.5 }
         renderTexture: { value: grey }
+        noiseIntensity: { value: 0.5 }
 }%
 
 CCProgram sprite-vs %{
@@ -71,6 +72,10 @@ CCProgram sprite-fs %{
 
   uniform sampler2D renderTexture;
 
+  uniform Constants {
+      float noiseIntensity;
+  };
+
   #if USE_TEXTURE
     in vec2 uv0;
     #pragma builtin(local)
@@ -81,20 +86,37 @@ CCProgram sprite-fs %{
         return fract(sin(p.x*ta+p.y*tb)*5678.);
     }
 
+    vec4 applyNoise(vec2 uv) {
+        float t = cc_time.x + 123.0;
+        float ta = t*.654321;
+        float tb = t*(ta*.123456);
+        float c = Noise21(uv, ta, tb);
+        return vec4(c);
+    }
+
+    vec4 addStripes(vec2 uv, vec4 col) {
+        if (uv.x > 0.0 && uv.x < 1.0 && uv.y > 0.0 && uv.y < 1.0) {
+            float stripesIntensity = 2.0;
+            float stripesSize = 300.0;
+            float stripesSpeed = 10.0;
+            float stripes = sin(uv.y * stripesSize + cc_time.x * stripesSpeed);
+            return mix(col, vec4(stripesIntensity), stripes / 20.0);
+        }
+        return col;
+    }
+
   vec4 frag () {
+    // Uv
     vec2 uv = gl_FragCoord.xy / cc_screenSize.xy;
-    float t = cc_time.x + 123.0;
-    float ta = t*.654321;
-    float tb = t*(ta*.123456);
-    float c = Noise21(uv, ta, tb);
-    vec4 noise = vec4(c);
-    vec4 o = texture2D(renderTexture, uv);
-    vec4 col = vec4(
-        noise.x * o.x,
-        noise.y * o.z,
-        noise.y * o.z,
-        1.0
-    );
+    // Noise
+    vec4 noise = applyNoise(uv);
+    // Render texture
+    vec4 renderTex = texture2D(renderTexture, uv);
+    // Merge render texture & noise
+    vec4 col = mix (noise.xyzw, renderTex.xyzw, noiseIntensity);
+    // Stripes
+    col = addStripes(uv, col);
+    // Output color
     ALPHA_TEST(col);
     return col;
   }
