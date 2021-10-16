@@ -1,0 +1,99 @@
+// Copyright (c) 2017-2020 Xiamen Yaji Software Co., Ltd.
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: sprite-vs:vert
+      frag: sprite-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState:
+        cullMode: none
+      properties:
+        alphaThreshold: { value: 0.5 }
+}%
+
+CCProgram sprite-vs %{
+  precision highp float;
+  #include <cc-global>
+  #if USE_LOCAL
+    #include <cc-local>
+  #endif
+  #if SAMPLE_FROM_RT
+    #include <common>
+  #endif
+  in vec3 a_position;
+  in vec2 a_texCoord;
+  in vec4 a_color;
+
+  out vec4 color;
+  out vec2 uv0;
+
+  vec4 vert () {
+    vec4 pos = vec4(a_position, 1);
+
+    #if USE_LOCAL
+      pos = cc_matWorld * pos;
+    #endif
+
+    #if USE_PIXEL_ALIGNMENT
+      pos = cc_matView * pos;
+      pos.xyz = floor(pos.xyz);
+      pos = cc_matProj * pos;
+    #else
+      pos = cc_matViewProj * pos;
+    #endif
+
+    uv0 = a_texCoord;
+    #if SAMPLE_FROM_RT
+      CC_HANDLE_RT_SAMPLE_FLIP(uv0);
+    #endif
+    color = a_color;
+
+    return pos;
+  }
+}%
+
+CCProgram sprite-fs %{
+  precision highp float;
+  #include <embedded-alpha>
+  #include <alpha-test>
+  #include <cc-global>
+
+  in vec4 color;
+
+  #if USE_TEXTURE
+    in vec2 uv0;
+    #pragma builtin(local)
+    layout(set = 2, binding = 10) uniform sampler2D cc_spriteTexture;
+  #endif
+
+  vec4 frag () {
+	float square_size = floor(2.0 + 30.0 * abs(sin(cc_time.x * 0.5)));
+
+    vec2 st = gl_FragCoord.xy / cc_screenSize.xy;
+	// Calculate the square center and corners
+	vec2 center = square_size * floor(uv0.xy * cc_screenSize.xy / square_size) + square_size * vec2(0.5, 0.5);
+	vec2 corner1 = center + square_size * vec2(-0.5, -0.5);
+	vec2 corner2 = center + square_size * vec2(+0.5, -0.5);
+	vec2 corner3 = center + square_size * vec2(+0.5, +0.5);
+	vec2 corner4 = center + square_size * vec2(-0.5, +0.5);
+
+	// Calculate the average pixel color
+	vec3 pixel_color = 0.4 * CCSampleWithAlphaSeparated(cc_spriteTexture, center / cc_screenSize.xy).rgb;
+    pixel_color += 0.15 * CCSampleWithAlphaSeparated(cc_spriteTexture, corner1 / cc_screenSize.xy).rgb;
+    pixel_color += 0.15 * CCSampleWithAlphaSeparated(cc_spriteTexture, corner2 / cc_screenSize.xy).rgb;
+    pixel_color += 0.15 * CCSampleWithAlphaSeparated(cc_spriteTexture, corner3 / cc_screenSize.xy).rgb;
+    pixel_color += 0.15 * CCSampleWithAlphaSeparated(cc_spriteTexture, corner4 / cc_screenSize.xy).rgb;
+
+    vec4 o = vec4(pixel_color.xyz, 1.0);
+    ALPHA_TEST(o);
+    return o;
+  }
+}%
