@@ -1,0 +1,64 @@
+{
+  "__type__": "cc.Material",
+  "_name": "",
+  "_objFlags": 0,
+  "_native": "",
+  "_effectAsset": {
+    "__uuid__": "48b8aa5c-f367-4375-926b-e72f36dc915f",
+    "__expectedType__": "cc.EffectAsset"
+  },
+  "_techIdx": "0",
+  "_defines": [
+    {
+      "USE_NORMAL_MAP": true
+    },
+    {},
+    {},
+    {}
+  ],
+  "_states": [
+    {
+      "rasterizerState": {},
+      "depthStencilState": {},
+      "blendState": {
+        "targets": [
+          {}
+        ]
+      }
+    },
+    {},
+    {},
+    {}
+  ],
+  "_props": [
+    {
+      "roughness": 1,
+      "metallic": 0.101,
+      "SpecularIntensity": 0.356,
+      "waveA": {
+        "__type__": "cc.Vec4",
+        "x": 1,
+        "y": 1,
+        "z": 0.5,
+        "w": 6
+      },
+      "waveB": {
+        "__type__": "cc.Vec4",
+        "x": 0,
+        "y": 1,
+        "z": 0.3,
+        "w": 3
+      },
+      "waveC": {
+        "__type__": "cc.Vec4",
+        "x": 1,
+        "y": 1.3,
+        "z": 0.25,
+        "w": 1
+      }
+    },
+    {},
+    {},
+    {}
+  ]
+}

@@ -1,13 +1,21 @@
 {
   "game": {
-    "name": "UNKNOW GAME",
-    "app_id": "UNKNOW",
+    "app_id": "645809008",
+    "name": "ShaderTest_20211019021500",
     "c_id": "0"
   },
   "appConfigMaps": [
     {
       "app_id": "UNKNOW",
       "config_id": "2e824b"
+    },
+    {
+      "app_id": "645809005",
+      "config_id": "40e9ba"
+    },
+    {
+      "app_id": "645809008",
+      "config_id": "6850e5"
     }
   ],
   "configs": [
@@ -17,6 +25,29 @@
       "config_name": "Default",
       "config_remarks": "",
       "services": []
+    },
+    {
+      "app_id": "645809005",
+      "config_id": "40e9ba",
+      "config_name": "Default",
+      "config_remarks": "",
+      "services": []
+    },
+    {
+      "app_id": "645809008",
+      "config_id": "6850e5",
+      "config_name": "Default",
+      "config_remarks": "",
+      "services": [
+        {
+          "service_id": "235",
+          "enable": false,
+          "param": {
+            "app_id": "645809008",
+            "store_id": "H5"
+          }
+        }
+      ]
     }
   ]
 }
